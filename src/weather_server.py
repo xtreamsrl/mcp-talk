@@ -16,6 +16,13 @@ def get_available_countries() -> list[dict[str, str]]:
     ]
 
 
+@mcp.prompt()
+def get_weather_suggestions(location: str, forecast: str) -> str:
+    return f"""
+I'm in {location} and the weather is {forecast}. What should I do?
+    """
+
+
 @mcp.tool("get_current_weather")
 def get_current_weather(
     location: str, unit: Literal["celsius", "fahrenheit"] = "celsius"
