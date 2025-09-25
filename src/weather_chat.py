@@ -8,45 +8,43 @@ from mcp.client.stdio import stdio_client
 from mcp.types import CallToolResult
 from openai import OpenAI
 
-
-class WeatherHuggingChat:
+######################## RUN IT USING ################################
+# uv run --env-file=.env src/weather_chat.py src/mcp_server_mock.py
+######################################################################
+class CoolAIApplication:
     def __init__(self):
         # Initialize session and client objects
         self.client_session: ClientSession | None = None
-        self.exit_stack = AsyncExitStack()
-        self.openai_client = OpenAI()
+        self.exit_stack: AsyncExitStack = AsyncExitStack()
+        self.openai_client: OpenAI = OpenAI()
 
     async def connect_to_server(self, server_script_path: str):
         """Connect to an MCP server
         
         Args:
-            server_script_path: Path to the server script (.py or .js)
+            server_script_path: Path to the server script (.py)
         """
-        is_python = server_script_path.endswith('.py')
-        is_js = server_script_path.endswith('.js')
-        if not (is_python or is_js):
-            raise ValueError("Server script must be a .py or .js file")
             
-        command = "python" if is_python else "node"
         server_params = StdioServerParameters(
-            command=command,
+            command="python",
             args=[server_script_path],
             env=None
         )
-        
+
+        # establishing bidirectional communication channel between your client application and the MCP server
         stdio_transport = await self.exit_stack.enter_async_context(stdio_client(server_params))
-        self.stdio, self.write = stdio_transport
-        self.session = await self.exit_stack.enter_async_context(ClientSession(self.stdio, self.write))
+        stdio = stdio_transport[0] 
+        write = stdio_transport[1]
+        self.client_session: ClientSession = await self.exit_stack.enter_async_context(ClientSession(stdio, write))
         
-        await self.session.initialize()
-        
+        _ = await self.client_session.initialize()
+            
         # List available tools
-        response = await self.session.list_tools()
+        response = await self.client_session.list_tools()
         tools = response.tools
         print("\nConnected to server with tools:", [tool.name for tool in tools])
 
     async def process_query(self, query: str) -> str:
-        """Process a query using Claude and available tools"""
         messages = [
             {
                 "role": "user",
@@ -54,7 +52,7 @@ class WeatherHuggingChat:
             }
         ]
 
-        response = await self.session.list_tools()
+        response = await self.client_session.list_tools()
         available_tools = [{
             "type": "function",
             "name": tool.name,
@@ -77,7 +75,7 @@ class WeatherHuggingChat:
                 tool_name = item.name
                 tool_args = item.arguments
                 
-                result: CallToolResult = await self.session.call_tool(tool_name, json.loads(tool_args))
+                result: CallToolResult = await self.client_session.call_tool(tool_name, json.loads(tool_args))
 
                 logging.info(f"Calling tool {tool_name} with args {tool_args} gave result {result}")
 
@@ -117,14 +115,15 @@ class WeatherHuggingChat:
     
     async def cleanup(self):
         """Clean up resources"""
-        await self.exit_stack.aclose()
+        if self.exit_stack:
+            await self.exit_stack.aclose()
 
 async def main():
     if len(sys.argv) < 2:
         print("Usage: python client.py <path_to_server_script>")
         sys.exit(1)
         
-    client = MCPClient()
+    client = CoolAIApplication()
     try:
         await client.connect_to_server(sys.argv[1])
         await client.chat_loop()

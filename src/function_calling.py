@@ -1,9 +1,13 @@
 import json
-import os
 from typing import Callable
 from openai import OpenAI
 
 from weather import get_current_weather, get_sun_times, get_weather_forecast
+
+
+############## RUN USING #########################
+# uv run --env-file=.env src/function_calling.py
+##################################################
 
 def main() -> None:
     client = OpenAI()
