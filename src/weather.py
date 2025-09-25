@@ -1,28 +1,56 @@
-import os
-from typing import Literal
-
 import httpx
+from datetime import datetime
 
+API_KEY = "a0bb02904a8036706c36e1f276aa39fb"
 
-def get_current_weather(
-    latitude: float,
-    longitude: float,
-    api_key: str,
-    units: Literal["imperial", "metric"] = "metric",
-) -> dict[str, str | int]:
-    base_url = "https://api.openweathermap.org/data/3.0/onecall"
-    params = {
-        "lat": latitude,
-        "lon": longitude,
-        "units": units,
-        "exclude": "minutely,hourly,daily",
-        "appid": api_key,
+def resolve_coordinates(location: str):
+    url = "http://api.openweathermap.org/data/2.5/weather"
+    response = httpx.get(url, params={"q": location, "appid": API_KEY})
+    
+    _ = response.raise_for_status()
+
+    data = response.json()
+    return data["coord"]["lat"], data["coord"]["lon"]
+
+def get_current_weather(location: str):
+    url = "http://api.openweathermap.org/data/2.5/weather"
+    response = httpx.get(url, params={"q": location, "appid": API_KEY, "units": "metric"})
+    data = response.json()
+    
+    _ = response.raise_for_status()
+    return {
+        "temperature": f"{data['main']['temp']}°C",
+        "description": data['weather'][0]['description'],
+        "humidity": f"{data['main']['humidity']}%",
+        "wind": f"{data['wind']['speed']} m/s"
     }
-    return httpx.get(base_url, params=params).json()
 
+def get_weather_forecast(location: str, days: int):
+    url = "http://api.openweathermap.org/data/2.5/forecast"
+    response = httpx.get(url, params={"q": location, "appid": API_KEY, "units": "metric"})
+    data = response.json()
+    _ = response.raise_for_status()
 
-if __name__ == "__main__":
-    weather = get_current_weather(
-        45.47794032288698, 9.142334791414777, os.getenv("OPENWEATHER_API_KEY")
-    )
-    print(weather)
+    daily = {}
+    for item in data["list"]:
+        date = item["dt_txt"].split(" ")[0]
+        if date not in daily:
+            daily[date] = []
+        daily[date].append(item["main"]["temp"])
+    forecast = []
+    for i, (date, temps) in enumerate(daily.items()):
+        if i >= days:
+            break
+        forecast.append({"date": date, "min": f"{min(temps)}°C", "max": f"{max(temps)}°C"})
+    return {"forecast": forecast}
+
+def get_sun_times(location: str):
+    url = "http://api.openweathermap.org/data/2.5/weather"
+    response = httpx.get(url, params={"q": location, "appid": API_KEY})
+    data = response.json()
+    _ = response.raise_for_status()
+
+    return {
+        "sunrise": datetime.fromtimestamp(data["sys"]["sunrise"]).strftime("%H:%M:%S"),
+        "sunset": datetime.fromtimestamp(data["sys"]["sunset"]).strftime("%H:%M:%S")
+    }
