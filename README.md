@@ -17,3 +17,7 @@ To run the MCP server, use the following command:
 mcp install src/mcp_server.py
 mcp dev src/mcp_server.py
 ```
+
+
+## Slides for the presentation
+https://github.com/xtreamsrl/mcp-talk/blob/main/Pydata%20AMS%20-%20MCP%20Principles%20and%20Practice.pdf
