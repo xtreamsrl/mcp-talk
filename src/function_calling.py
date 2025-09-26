@@ -77,8 +77,8 @@ def main() -> None:
         tool_choice="auto",
     )
 
+    # Get the tool call from the openAI response
     tool_call = response.output[0]
-
     function_name = tool_call.name
     function_args = json.loads(tool_call.arguments)
 
@@ -88,11 +88,14 @@ def main() -> None:
         "get_sun_times": get_sun_times
     }[function_name]
     
+    # Call the tool
     result = tool(**function_args)
 
+    # Print the tool call and the result
     print(f"\nAssistant is calling: {function_name}({function_args})")
     print(f"\nFunction call retuned: {result}")
 
+    # Add the tool call and the result to the messages
     messages = messages + [
         tool_call,
         {
@@ -101,6 +104,8 @@ def main() -> None:
             "output": json.dumps(result),
         },
     ]
+
+    # Call the final response
     final_response = client.responses.create(
         model="gpt-4o",
         input=messages,

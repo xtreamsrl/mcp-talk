@@ -42,7 +42,13 @@ class CoolAIApplication:
         # List available tools
         response = await self.client_session.list_tools()
         tools = response.tools
+        prompts = await self.client_session.list_prompts()
+        prompts = prompts.prompts
+        resources = await self.client_session.list_resources()
+        resources = resources.resources
         print("\nConnected to server with tools:", [tool.name for tool in tools])
+        print("\nConnected to server with prompts:", [prompt.name for prompt in prompts])
+        print("\nConnected to server with resources:", [resource.name for resource in resources])
 
     async def process_query(self, query: str) -> str:
         messages = [
