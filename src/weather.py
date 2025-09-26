@@ -1,7 +1,7 @@
 import httpx
 from datetime import datetime
 
-API_KEY = "a0bb02904a8036706c36e1f276aa39fb"
+API_KEY = "..."
 
 def resolve_coordinates(location: str):
     url = "http://api.openweathermap.org/data/2.5/weather"
