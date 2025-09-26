@@ -7,24 +7,6 @@ from weather import API_KEY
 
 mcp = FastMCP("weather-server")
 
-
-@mcp.resource("weather://available_countries")
-def get_available_countries() -> list[dict[str, str]]:
-    return [
-        {"code": "US", "name": "United States", "region": "North America"},
-        {"code": "CA", "name": "Canada", "region": "North America"},
-        {"code": "UK", "name": "United Kingdom", "region": "Europe"},
-        {"code": "FR", "name": "France", "region": "Europe"},
-    ]
-
-
-@mcp.prompt()
-def get_weather_suggestions(location: str, forecast: str) -> str:
-    return f"""
-I'm in {location} and the weather is {forecast}. What should I do?
-    """
-
-
 @mcp.tool("get_current_weather")
 def get_current_weather(location: str):
     url = "http://api.openweathermap.org/data/2.5/weather"
@@ -69,6 +51,22 @@ def get_sun_times(location: str):
         "sunrise": datetime.fromtimestamp(data["sys"]["sunrise"]).strftime("%H:%M:%S"),
         "sunset": datetime.fromtimestamp(data["sys"]["sunset"]).strftime("%H:%M:%S")
     }
+
+@mcp.resource("weather://available_countries")
+def get_available_countries() -> list[dict[str, str]]:
+    return [
+        {"code": "US", "name": "United States", "region": "North America"},
+        {"code": "CA", "name": "Canada", "region": "North America"},
+        {"code": "UK", "name": "United Kingdom", "region": "Europe"},
+        {"code": "FR", "name": "France", "region": "Europe"},
+    ]
+
+
+@mcp.prompt()
+def get_weather_suggestions(location: str, forecast: str) -> str:
+    return f"""
+I'm in {location} and the weather is {forecast}. What should I do?
+    """
 
 if __name__ == "__main__":
     # Initialize and run the local MCP server

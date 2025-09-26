@@ -9,7 +9,7 @@ from mcp.types import CallToolResult
 from openai import OpenAI
 
 ######################## RUN IT USING ################################
-# uv run --env-file=.env src/weather_chat.py src/mcp_server_mock.py
+# uv run --env-file=.env src/weather_chat.py src/mcp_server.py
 ######################################################################
 class CoolAIApplication:
     def __init__(self):
