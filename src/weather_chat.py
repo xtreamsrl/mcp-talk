@@ -26,8 +26,8 @@ class CoolAIApplication:
         """
             
         server_params = StdioServerParameters(
-            command="python",
-            args=[server_script_path],
+            command="uv",
+            args=["run","--env-file=.env", server_script_path],
             env=None
         )
 

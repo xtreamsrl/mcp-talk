@@ -1,11 +1,12 @@
 import httpx
+import os
 from datetime import datetime
 
-API_KEY = "..."
+OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY")
 
 def resolve_coordinates(location: str):
     url = "http://api.openweathermap.org/data/2.5/weather"
-    response = httpx.get(url, params={"q": location, "appid": API_KEY})
+    response = httpx.get(url, params={"q": location, "appid": OPENWEATHER_API_KEY})
     
     _ = response.raise_for_status()
 
@@ -14,7 +15,7 @@ def resolve_coordinates(location: str):
 
 def get_current_weather(location: str):
     url = "http://api.openweathermap.org/data/2.5/weather"
-    response = httpx.get(url, params={"q": location, "appid": API_KEY, "units": "metric"})
+    response = httpx.get(url, params={"q": location, "appid": OPENWEATHER_API_KEY, "units": "metric"})
     data = response.json()
     
     _ = response.raise_for_status()
@@ -27,7 +28,7 @@ def get_current_weather(location: str):
 
 def get_weather_forecast(location: str, days: int):
     url = "http://api.openweathermap.org/data/2.5/forecast"
-    response = httpx.get(url, params={"q": location, "appid": API_KEY, "units": "metric"})
+    response = httpx.get(url, params={"q": location, "appid": OPENWEATHER_API_KEY, "units": "metric"})
     data = response.json()
     _ = response.raise_for_status()
 
@@ -46,7 +47,7 @@ def get_weather_forecast(location: str, days: int):
 
 def get_sun_times(location: str):
     url = "http://api.openweathermap.org/data/2.5/weather"
-    response = httpx.get(url, params={"q": location, "appid": API_KEY})
+    response = httpx.get(url, params={"q": location, "appid": OPENWEATHER_API_KEY})
     data = response.json()
     _ = response.raise_for_status()
 

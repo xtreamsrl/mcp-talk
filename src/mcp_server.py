@@ -1,16 +1,18 @@
 from datetime import datetime
-
+import os
 import httpx
 from mcp.server.fastmcp import FastMCP
-
-from weather import API_KEY
 
 mcp = FastMCP("weather-server")
 
 @mcp.tool("get_current_weather")
 def get_current_weather(location: str):
+    """Get the current weather for a given location"""
+
+    OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY")
+    print("OPENWEATHER_API_KEY", OPENWEATHER_API_KEY)
     url = "http://api.openweathermap.org/data/2.5/weather"
-    response = httpx.get(url, params={"q": location, "appid": API_KEY, "units": "metric"})
+    response = httpx.get(url, params={"q": location, "appid": OPENWEATHER_API_KEY, "units": "metric"})
     data = response.json()
     _ = response.raise_for_status()
     return {
@@ -20,10 +22,13 @@ def get_current_weather(location: str):
         "wind": f"{data['wind']['speed']} m/s"
     }
 
-@mcp.tool("get_weather_forecast")
+@mcp.tool("get_weather_forecast", description="Get the weather forecast for a given location")
 def get_weather_forecast(location: str, days: int):
+    """Get the weather forecast for a given location"""
+
+    OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY")
     url = "http://api.openweathermap.org/data/2.5/forecast"
-    response = httpx.get(url, params={"q": location, "appid": API_KEY, "units": "metric"})
+    response = httpx.get(url, params={"q": location, "appid": OPENWEATHER_API_KEY, "units": "metric"})
     data = response.json()
     _ = response.raise_for_status()
 
@@ -42,8 +47,11 @@ def get_weather_forecast(location: str, days: int):
 
 @mcp.tool("get_sun_times")
 def get_sun_times(location: str):
+    """Get the sunrise and sunset times for a given location"""
+
+    OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY")
     url = "http://api.openweathermap.org/data/2.5/weather"
-    response = httpx.get(url, params={"q": location, "appid": API_KEY})
+    response = httpx.get(url, params={"q": location, "appid": OPENWEATHER_API_KEY})
     data = response.json()
     _ = response.raise_for_status()
 
@@ -54,6 +62,7 @@ def get_sun_times(location: str):
 
 @mcp.resource("weather://available_countries")
 def get_available_countries() -> list[dict[str, str]]:
+    """Get the list of available countries"""
     return [
         {"code": "US", "name": "United States", "region": "North America"},
         {"code": "CA", "name": "Canada", "region": "North America"},
@@ -64,6 +73,7 @@ def get_available_countries() -> list[dict[str, str]]:
 
 @mcp.prompt()
 def get_weather_suggestions(location: str, forecast: str) -> str:
+    """Get weather suggestions for a given location and forecast"""
     return f"""
 I'm in {location} and the weather is {forecast}. What should I do?
     """
